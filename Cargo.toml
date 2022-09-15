@@ -20,6 +20,7 @@ crate-type = ["lib", "cdylib"]
 [dependencies]
 ndarray = { version = "0.15", features = ["rayon"] }
 ndarray-linalg = {version = "0.14"}
+pyo3 = { version = "0.17.1", features = ["extension-module"] }
 
 [dependencies.pyo3]
 version = "0.13.2"
