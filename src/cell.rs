@@ -1,5 +1,5 @@
+use ndarray::Array1;
 use pyo3::prelude::*;
-use ndarray::{Array1};
 
 pub trait Cell {
     fn geometry() -> Array1<f64>;
