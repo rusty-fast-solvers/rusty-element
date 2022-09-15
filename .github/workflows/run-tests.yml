@@ -46,6 +46,8 @@ jobs:
       - name: Style checks
         run: flake8 rusty_element
       - name: Install Python library
-        run: pip3 install .
+        run: |
+          pip3 install setuptools-rust
+          pip3 install .
       - name: Run tests
         run: python3 -m pytest test
