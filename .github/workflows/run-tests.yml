@@ -50,4 +50,4 @@ jobs:
           pip3 install setuptools-rust
           pip3 install .
       - name: Run tests
-        run: python3 -m pytest test
+        run: python3 -m pytest test/
