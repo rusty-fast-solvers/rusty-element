@@ -27,6 +27,8 @@ jobs:
           rust-version: ${{ matrix.rust }}
       - uses: actions/checkout@v2
       - name: Style checks
-        run: cargo fmt -- --check
+        run: |
+          rustup component add rustfmt
+          cargo fmt -- --check
       - name: Run tests
         run: cargo test
