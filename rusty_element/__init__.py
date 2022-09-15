@@ -1,1 +1,1 @@
-from .rusty_element import lib
+from ._internal import lib
