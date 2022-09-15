@@ -41,11 +41,11 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - uses: actions/checkout@v2
+      - name: Install test requirements
+        run: pip3 install pytest flake8
       - name: Style checks
         run: flake8 rusty_element
       - name: Install Python library
         run: pip3 install .
-      - name: Install test requirements
-        run: pip3 install pytest
       - name: Run tests
         run: python3 -m pytest test
