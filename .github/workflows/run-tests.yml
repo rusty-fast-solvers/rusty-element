@@ -11,20 +11,17 @@ on:
     - cron: "0 7 * * 1"
 
 jobs:
-  run-tests:
-    name: Run tests
+  run-tests-rust:
+    name: Run tests (Rust)
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        rust:
-          - stable
-          - beta
-          - nightly
+        rust-version: ["stable", "beta", "nightly"]
     steps:
       - name: Set up Rust
         uses: ATiltedTree/setup-rust@v1
         with:
-          rust-version: ${{ matrix.rust }}
+          rust-version: ${{ matrix.rust-version }}
       - uses: actions/checkout@v2
       - name: Style checks
         run: |
@@ -32,3 +29,23 @@ jobs:
           cargo fmt -- --check
       - name: Run tests
         run: cargo test
+  run-tests-python:
+    name: Run tests (Python)
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.7", "3.8", "3.9", "3.10"]
+    steps:
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - uses: actions/checkout@v2
+      - name: Style checks
+        run: flake8 rusty_element
+      - name: Install Python library
+        run: pip3 install .
+      - name: Install test requirements
+        run: pip3 install pytest
+      - name: Run tests
+        run: python3 -m pytest test
