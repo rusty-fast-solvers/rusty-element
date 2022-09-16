@@ -5,7 +5,9 @@ pub trait Geometry {}
 pub trait Topology {
     fn vertex_count(&self) -> u8;
     fn edge_count(&self) -> u8;
-    fn face_count(&self) -> u8 { 1 }
+    fn face_count(&self) -> u8 {
+        1
+    }
 }
 
 pub struct Cell {
