@@ -1,13 +1,10 @@
 use ndarray::Array1;
-use pyo3::prelude::*;
 
 pub trait Cell {
     fn geometry() -> Array1<f64>;
     fn topology() -> Array1<u64>;
 }
 
-#[pyfunction]
-#[no_mangle]
 pub fn add(a: i64, b: i64) -> i64 {
     a + b
 }
