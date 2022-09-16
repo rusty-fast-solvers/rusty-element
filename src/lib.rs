@@ -8,7 +8,7 @@ fn myadd(a: usize, b: usize) -> PyResult<usize> {
 }
 
 #[pymodule]
-#[pyo3(name = "rusty_element")]
+#[pyo3(name = "_rusty_element")]
 fn my_extension(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
     m.add_wrapped(wrap_pyfunction!(myadd))?;
 

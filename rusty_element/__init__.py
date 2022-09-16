@@ -1,1 +1,1 @@
-from .rusty_element import *  # noqa: F403
+from ._rusty_element import *  # noqa: F403
