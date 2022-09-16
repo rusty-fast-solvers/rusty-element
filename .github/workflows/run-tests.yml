@@ -52,7 +52,7 @@ jobs:
       - name: Install test requirements
         run: pip3 install pytest flake8
       - name: Style checks
-        run: flake8 rusty_element
+        run: flake8 python/
       - name: Install Python library
         run: |
           pip3 install setuptools-rust
