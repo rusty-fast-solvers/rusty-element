@@ -1,0 +1,23 @@
+[package]
+name = "rusty-element"
+version = "0.1.0"
+edition = "2021"
+authors = ["Matthew Scroggs <matthew.w.scroggs@gmail.com>"]
+description = "A library for the evaluation of finite element basis functions."
+license = "BSD-3-Clause"
+homepage = "https://github.com/rusty-fast-solvers/rusty-element"
+repository = "https://github.com/rusty-fast-solvers/rusty-element"
+readme = "README.md"
+keywords = ["numerics"]
+categories = ["mathematics", "science"]
+
+[lib]
+name = "rusty_element"
+crate-type = ["lib", "cdylib"]
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+ndarray = { version = "0.15", features = ["rayon"] }
+ndarray-linalg = {version = "0.14"}
+pyo3 = { version = "0.17.1", features = ["extension-module"] }
