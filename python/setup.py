@@ -1,5 +1,4 @@
 from setuptools import setup
-from setuptools_rust import Binding, RustExtension
 
 setup(
     name="rusty-element",
