@@ -39,7 +39,10 @@ pub trait ReferenceCell {
     /// The number of volumes
     fn volume_count(&self) -> usize;
 
-    /// TODO
+    /// Get the entities connected to an entity
+    /// 
+    /// This function returns a list of entity numbers of entities of dimension CONNECTED_DIM that are attached to the entity numbered ENTITY_DIM of number entity_number.
+    /// For example connectivity<1, 2>(0) will return a list of faces (2D entities) that are connected to edge (1D entity) 0.
     fn connectivity<const ENTITY_DIM: usize, const CONNECTED_DIM: usize>(
         &self,
         entity_number: usize,
@@ -85,16 +88,6 @@ impl ReferenceCell for Triangle {
     fn volume_count(&self) -> usize {
         0
     }
-
-    // fn connectivity() -> Vec<Vec<Vec<Vec<usize>>>>
-    // {
-    //     [
-    //         [[[0], [1, 2], [0]], [[1], [0, 2], [0]], [[2], [0, 1], [0]]],
-    //         [[[1, 2], [0], [0]], [[0, 2], [1], [0]], [[0, 1], [2], [0]]],
-    //         [[[0, 1, 2], [0, 1, 2], [0]]]]
-
-    // }
-
     fn connectivity<const ENTITY_DIM: usize, const CONNECTED_DIM: usize>(
         &self,
         entity_number: usize,
@@ -126,7 +119,6 @@ impl ReferenceCell for Triangle {
             2 => {
                 assert!(entity_number == 0);
                 match CONNECTED_DIM {
-                    // entity_number must be 0
                     0 => Ok(vec![0, 1, 2]),
                     1 => Ok(vec![0, 1, 2]),
                     2 => Ok(vec![0]),
