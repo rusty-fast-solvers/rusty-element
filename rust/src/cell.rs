@@ -1,10 +1,10 @@
 //! Cell definitions
 
-use more_asserts as ma;
-
 /// A 0- to 3- dimensional reference cell
 pub trait ReferenceCell {
     const DIM: usize;
+
+    fn new() -> Self;
 
     /// The dimension of the reference cell (eg a triangle's dimension is 2, tetrahedron's dimension is 3)
     fn dim(&self) -> usize {
@@ -35,67 +35,19 @@ pub trait ReferenceCell {
     fn volumes(&self) -> Vec<usize>;
 
     /// The number of vertices
-    fn vertex_count(&self) -> usize {
-        self.vertices().len() / Self::DIM
-    }
+    fn vertex_count(&self) -> usize;
 
     /// The number of edges
-    fn edge_count(&self) -> usize {
-        self.edges().len() / 2
-    }
+    fn edge_count(&self) -> usize;
 
     /// The number of faces
-    fn face_count(&self) -> usize {
-        self.faces_nvertices().len()
-    }
+    fn face_count(&self) -> usize;
 
     /// The number of volumes
-    fn volume_count(&self) -> usize {
-        if self.volumes().len() > 0 {
-            return 1;
-        }
-        0
-    }
-
-    /// Get the `n`th vertex of the cell.
-    ///
-    /// * `n` - The vertex number
-    fn vertex(&self, n: usize) -> Vec<f64> {
-        ma::debug_assert_lt!(n, self.vertex_count());
-        self.vertices()[n * Self::DIM..(n + 1) * Self::DIM].to_vec()
-    }
-
-    /// Get the `n`th edge of the cell.
-    ///
-    /// * `n` - The edge number
-    fn edge(&self, n: usize) -> Vec<usize> {
-        ma::debug_assert_lt!(n, self.edge_count());
-        self.edges()[n * 2..(n + 1) * 2].to_vec()
-    }
-
-    /// Get the `n`th face of the cell.
-    ///
-    /// * `n` - The face number
-    fn face(&self, n: usize) -> Vec<usize> {
-        ma::debug_assert_lt!(n, self.face_count());
-        let mut start = 0;
-        let nv = self.faces_nvertices();
-        for i in 1..n {
-            start += nv[i];
-        }
-        self.faces()[start..start + nv[n]].to_vec()
-    }
-
-    /// Get the `n`th volume of the cell.
-    ///
-    /// * `n` - The volume number
-    fn volume(&self, n: usize) -> Vec<usize> {
-        ma::debug_assert_lt!(n, self.volume_count());
-        self.volumes()
-    }
+    fn volume_count(&self) -> usize;
 }
 
-/// The reference triangle
+/// The reference interval
 struct Interval;
 
 /// The reference triangle
@@ -111,6 +63,10 @@ struct Tetrahedron;
 struct Prism;
 
 impl ReferenceCell for Interval {
+    fn new() -> Self {
+        Self {}
+    }
+
     const DIM: usize = 1;
     fn vertices(&self) -> Vec<f64> {
         vec![0.0, 1.0]
@@ -127,9 +83,25 @@ impl ReferenceCell for Interval {
     fn volumes(&self) -> Vec<usize> {
         vec![]
     }
+    fn vertex_count(&self) -> usize {
+        2
+    }
+    fn edge_count(&self) -> usize {
+        1
+    }
+    fn face_count(&self) -> usize {
+        0
+    }
+    fn volume_count(&self) -> usize {
+        0
+    }
 }
 
 impl ReferenceCell for Triangle {
+    fn new() -> Self {
+        Self {}
+    }
+
     const DIM: usize = 2;
     fn vertices(&self) -> Vec<f64> {
         vec![0.0, 0.0, 1.0, 0.0, 0.0, 1.0]
@@ -146,9 +118,25 @@ impl ReferenceCell for Triangle {
     fn volumes(&self) -> Vec<usize> {
         vec![]
     }
+    fn vertex_count(&self) -> usize {
+        3
+    }
+    fn edge_count(&self) -> usize {
+        3
+    }
+    fn face_count(&self) -> usize {
+        1
+    }
+    fn volume_count(&self) -> usize {
+        0
+    }
 }
 
 impl ReferenceCell for Quadrilateral {
+    fn new() -> Self {
+        Self {}
+    }
+
     const DIM: usize = 2;
     fn vertices(&self) -> Vec<f64> {
         vec![0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 1.0, 1.0]
@@ -165,9 +153,25 @@ impl ReferenceCell for Quadrilateral {
     fn volumes(&self) -> Vec<usize> {
         vec![]
     }
+    fn vertex_count(&self) -> usize {
+        4
+    }
+    fn edge_count(&self) -> usize {
+        4
+    }
+    fn face_count(&self) -> usize {
+        1
+    }
+    fn volume_count(&self) -> usize {
+        0
+    }
 }
 
 impl ReferenceCell for Tetrahedron {
+    fn new() -> Self {
+        Self {}
+    }
+
     const DIM: usize = 3;
     fn vertices(&self) -> Vec<f64> {
         vec![0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]
@@ -184,9 +188,25 @@ impl ReferenceCell for Tetrahedron {
     fn volumes(&self) -> Vec<usize> {
         vec![0, 1, 2, 3]
     }
+    fn vertex_count(&self) -> usize {
+        4
+    }
+    fn edge_count(&self) -> usize {
+        6
+    }
+    fn face_count(&self) -> usize {
+        4
+    }
+    fn volume_count(&self) -> usize {
+        1
+    }
 }
 
 impl ReferenceCell for Prism {
+    fn new() -> Self {
+        Self {}
+    }
+
     const DIM: usize = 3;
     fn vertices(&self) -> Vec<f64> {
         vec![
@@ -206,6 +226,18 @@ impl ReferenceCell for Prism {
     fn volumes(&self) -> Vec<usize> {
         vec![0, 1, 2, 3, 4, 5]
     }
+    fn vertex_count(&self) -> usize {
+        6
+    }
+    fn edge_count(&self) -> usize {
+        9
+    }
+    fn face_count(&self) -> usize {
+        5
+    }
+    fn volume_count(&self) -> usize {
+        1
+    }
 }
 
 pub fn add(a: i64, b: i64) -> i64 {
@@ -221,106 +253,35 @@ mod test {
         assert_eq!(4, add(2, 2));
     }
 
+    fn cell_tester<C: ReferenceCell>() {
+        let c = C::new();
+        assert_eq!(c.vertex_count(), c.vertices().len() / c.dim());
+        assert_eq!(c.edge_count(), c.edges().len() / 2);
+        assert_eq!(c.face_count(), c.faces_nvertices().len());
+    }
+
     #[test]
     fn test_interval() {
-        let interval = Interval {};
-        assert_eq!(interval.vertex_count(), 2);
-        assert_eq!(interval.edge_count(), 1);
-        assert_eq!(interval.face_count(), 0);
-        assert_eq!(interval.volume_count(), 0);
-
-        assert_eq!(interval.vertex(0).len(), 1);
-        assert_eq!(interval.vertex(1).len(), 1);
-        assert_eq!(interval.edge(0).len(), 2);
+        cell_tester::<Interval>();
     }
 
     #[test]
     fn test_triangle() {
-        let triangle = Triangle {};
-        assert_eq!(triangle.vertex_count(), 3);
-        assert_eq!(triangle.edge_count(), 3);
-        assert_eq!(triangle.face_count(), 1);
-        assert_eq!(triangle.volume_count(), 0);
-
-        assert_eq!(triangle.vertex(0).len(), 2);
-        assert_eq!(triangle.vertex(1).len(), 2);
-        assert_eq!(triangle.vertex(2).len(), 2);
-        assert_eq!(triangle.edge(0).len(), 2);
-        assert_eq!(triangle.edge(1).len(), 2);
-        assert_eq!(triangle.edge(2).len(), 2);
-        assert_eq!(triangle.face(0).len(), 3);
+        cell_tester::<Triangle>();
     }
 
     #[test]
     fn test_quadrilateral() {
-        let quadrilateral = Quadrilateral {};
-        assert_eq!(quadrilateral.vertex_count(), 4);
-        assert_eq!(quadrilateral.edge_count(), 4);
-        assert_eq!(quadrilateral.face_count(), 1);
-        assert_eq!(quadrilateral.volume_count(), 0);
-
-        assert_eq!(quadrilateral.vertex(0).len(), 2);
-        assert_eq!(quadrilateral.vertex(1).len(), 2);
-        assert_eq!(quadrilateral.vertex(2).len(), 2);
-        assert_eq!(quadrilateral.vertex(3).len(), 2);
-        assert_eq!(quadrilateral.edge(0).len(), 2);
-        assert_eq!(quadrilateral.edge(1).len(), 2);
-        assert_eq!(quadrilateral.edge(2).len(), 2);
-        assert_eq!(quadrilateral.edge(3).len(), 2);
-        assert_eq!(quadrilateral.face(0).len(), 4);
+        cell_tester::<Quadrilateral>();
     }
 
     #[test]
     fn test_tetrahedron() {
-        let tetrahedron = Tetrahedron {};
-        assert_eq!(tetrahedron.vertex_count(), 4);
-        assert_eq!(tetrahedron.edge_count(), 6);
-        assert_eq!(tetrahedron.face_count(), 4);
-        assert_eq!(tetrahedron.volume_count(), 1);
-
-        assert_eq!(tetrahedron.vertex(0).len(), 3);
-        assert_eq!(tetrahedron.vertex(1).len(), 3);
-        assert_eq!(tetrahedron.vertex(2).len(), 3);
-        assert_eq!(tetrahedron.vertex(3).len(), 3);
-        assert_eq!(tetrahedron.edge(0).len(), 2);
-        assert_eq!(tetrahedron.edge(1).len(), 2);
-        assert_eq!(tetrahedron.edge(2).len(), 2);
-        assert_eq!(tetrahedron.edge(3).len(), 2);
-        assert_eq!(tetrahedron.edge(4).len(), 2);
-        assert_eq!(tetrahedron.edge(5).len(), 2);
-        assert_eq!(tetrahedron.face(0).len(), 3);
-        assert_eq!(tetrahedron.face(1).len(), 3);
-        assert_eq!(tetrahedron.face(2).len(), 3);
-        assert_eq!(tetrahedron.face(3).len(), 3);
-        assert_eq!(tetrahedron.volume(0).len(), 4);
+        cell_tester::<Tetrahedron>();
     }
 
     #[test]
     fn test_prism() {
-        let prism = Prism {};
-        assert_eq!(prism.vertex_count(), 6);
-        assert_eq!(prism.edge_count(), 9);
-        assert_eq!(prism.face_count(), 5);
-        assert_eq!(prism.volume_count(), 1);
-
-        assert_eq!(prism.vertex(0).len(), 3);
-        assert_eq!(prism.vertex(1).len(), 3);
-        assert_eq!(prism.vertex(2).len(), 3);
-        assert_eq!(prism.vertex(3).len(), 3);
-        assert_eq!(prism.edge(0).len(), 2);
-        assert_eq!(prism.edge(1).len(), 2);
-        assert_eq!(prism.edge(2).len(), 2);
-        assert_eq!(prism.edge(3).len(), 2);
-        assert_eq!(prism.edge(4).len(), 2);
-        assert_eq!(prism.edge(5).len(), 2);
-        assert_eq!(prism.edge(6).len(), 2);
-        assert_eq!(prism.edge(7).len(), 2);
-        assert_eq!(prism.edge(8).len(), 2);
-        assert_eq!(prism.face(0).len(), 3);
-        assert_eq!(prism.face(1).len(), 4);
-        assert_eq!(prism.face(2).len(), 4);
-        assert_eq!(prism.face(3).len(), 4);
-        assert_eq!(prism.face(4).len(), 3);
-        assert_eq!(prism.volume(0).len(), 6);
+        cell_tester::<Prism>();
     }
 }
