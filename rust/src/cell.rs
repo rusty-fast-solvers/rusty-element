@@ -4,8 +4,6 @@
 pub trait ReferenceCell {
     const DIM: usize;
 
-    fn new() -> Self;
-
     /// The dimension of the reference cell (eg a triangle's dimension is 2, tetrahedron's dimension is 3)
     fn dim(&self) -> usize {
         Self::DIM
@@ -14,25 +12,20 @@ pub trait ReferenceCell {
     /// The vertices of the cell
     ///
     /// The first dim components represent the first vertex, the next dim the second vertex, and so on.
-    fn vertices(&self) -> Vec<f64>;
+    fn vertices(&self) -> &[f64];
 
     /// The edges of the cell
     ///
     /// The first 2 components are the vertex numbers of the endpoints of the first edge, the next 2 the second edge, and so on.
-    fn edges(&self) -> Vec<usize>;
+    fn edges(&self) -> &[usize];
 
     /// The faces of the cell
     ///
     /// The first `self.faces_nvertices()[0]` components are the vertex numbers of vertices of the first face, the next `self.faces_nvertices()[1]` the second edge, and so on.
-    fn faces(&self) -> Vec<usize>;
+    fn faces(&self) -> &[usize];
 
     /// The number of vertices adjacent to each face
-    fn faces_nvertices(&self) -> Vec<usize>;
-
-    /// The volumes of the cell
-    ///
-    /// The components are the vertex numbers of the vertices of the volume.
-    fn volumes(&self) -> Vec<usize>;
+    fn faces_nvertices(&self) -> &[usize];
 
     /// The number of vertices
     fn vertex_count(&self) -> usize;
@@ -45,13 +38,105 @@ pub trait ReferenceCell {
 
     /// The number of volumes
     fn volume_count(&self) -> usize;
+
+    /// TODO
+    fn connectivity<const ENTITY_DIM: usize, const CONNECTED_DIM: usize>(
+        &self,
+        entity_number: usize,
+    ) -> Result<Vec<usize>, ()>;
 }
 
 /// The reference interval
 struct Interval;
 
 /// The reference triangle
-struct Triangle;
+pub struct Triangle;
+
+impl ReferenceCell for Triangle {
+    const DIM: usize = 2;
+    fn vertices(&self) -> &[f64] {
+        static VERTICES: [f64; 6] = [0.0, 0.0, 1.0, 0.0, 0.0, 1.0];
+        &VERTICES
+    }
+
+    fn edges(&self) -> &[usize] {
+        static EDGES: [usize; 6] = [1, 2, 0, 2, 0, 1];
+        &EDGES
+    }
+
+    fn faces(&self) -> &[usize] {
+        static FACES: [usize; 3] = [0, 1, 2];
+        &FACES
+    }
+    fn faces_nvertices(&self) -> &[usize] {
+        static FACES_NV: [usize; 1] = [3];
+        &FACES_NV
+    }
+
+    fn vertex_count(&self) -> usize {
+        3
+    }
+    fn edge_count(&self) -> usize {
+        3
+    }
+    fn face_count(&self) -> usize {
+        1
+    }
+    fn volume_count(&self) -> usize {
+        0
+    }
+
+    // fn connectivity() -> Vec<Vec<Vec<Vec<usize>>>>
+    // {
+    //     [
+    //         [[[0], [1, 2], [0]], [[1], [0, 2], [0]], [[2], [0, 1], [0]]],
+    //         [[[1, 2], [0], [0]], [[0, 2], [1], [0]], [[0, 1], [2], [0]]],
+    //         [[[0, 1, 2], [0, 1, 2], [0]]]]
+
+    // }
+
+    fn connectivity<const ENTITY_DIM: usize, const CONNECTED_DIM: usize>(
+        &self,
+        entity_number: usize,
+    ) -> Result<Vec<usize>, ()> {
+        match ENTITY_DIM {
+            0 => {
+                assert!(entity_number < 3);
+                match CONNECTED_DIM {
+                    0 => Ok(vec![entity_number]),
+                    1 => match entity_number {
+                        0 => Ok(vec![1, 2]),
+                        1 => Ok(vec![0, 2]),
+                        2 => Ok(vec![0, 1]),
+                        _ => Err(()),
+                    },
+                    2 => Ok(vec![0]),
+                    _ => Err(()),
+                }
+            }
+            1 => {
+                assert!(entity_number < 3);
+                match CONNECTED_DIM {
+                    0 => Ok(self.edges()[entity_number * 2..(entity_number + 1) * 2].to_vec()),
+                    1 => Ok(vec![entity_number]),
+                    2 => Ok(vec![0]),
+                    _ => Err(()),
+                }
+            }
+            2 => {
+                assert!(entity_number == 0);
+                match CONNECTED_DIM {
+                    // entity_number must be 0
+                    0 => Ok(vec![0, 1, 2]),
+                    1 => Ok(vec![0, 1, 2]),
+                    2 => Ok(vec![0]),
+                    _ => Err(()),
+                }
+            }
+            _ => Err(()),
+        }
+    }
+}
 
 /// The reference quadrilateral
 struct Quadrilateral;
@@ -61,11 +146,8 @@ struct Tetrahedron;
 
 /// The reference prism
 struct Prism;
-
+/*
 impl ReferenceCell for Interval {
-    fn new() -> Self {
-        Self {}
-    }
 
     const DIM: usize = 1;
     fn vertices(&self) -> Vec<f64> {
@@ -96,46 +178,10 @@ impl ReferenceCell for Interval {
         0
     }
 }
+*/
 
-impl ReferenceCell for Triangle {
-    fn new() -> Self {
-        Self {}
-    }
-
-    const DIM: usize = 2;
-    fn vertices(&self) -> Vec<f64> {
-        vec![0.0, 0.0, 1.0, 0.0, 0.0, 1.0]
-    }
-    fn edges(&self) -> Vec<usize> {
-        vec![1, 2, 0, 2, 0, 1]
-    }
-    fn faces(&self) -> Vec<usize> {
-        vec![0, 1, 2]
-    }
-    fn faces_nvertices(&self) -> Vec<usize> {
-        vec![3]
-    }
-    fn volumes(&self) -> Vec<usize> {
-        vec![]
-    }
-    fn vertex_count(&self) -> usize {
-        3
-    }
-    fn edge_count(&self) -> usize {
-        3
-    }
-    fn face_count(&self) -> usize {
-        1
-    }
-    fn volume_count(&self) -> usize {
-        0
-    }
-}
-
+/*
 impl ReferenceCell for Quadrilateral {
-    fn new() -> Self {
-        Self {}
-    }
 
     const DIM: usize = 2;
     fn vertices(&self) -> Vec<f64> {
@@ -168,9 +214,6 @@ impl ReferenceCell for Quadrilateral {
 }
 
 impl ReferenceCell for Tetrahedron {
-    fn new() -> Self {
-        Self {}
-    }
 
     const DIM: usize = 3;
     fn vertices(&self) -> Vec<f64> {
@@ -203,9 +246,6 @@ impl ReferenceCell for Tetrahedron {
 }
 
 impl ReferenceCell for Prism {
-    fn new() -> Self {
-        Self {}
-    }
 
     const DIM: usize = 3;
     fn vertices(&self) -> Vec<f64> {
@@ -239,7 +279,7 @@ impl ReferenceCell for Prism {
         1
     }
 }
-
+*/
 pub fn add(a: i64, b: i64) -> i64 {
     a + b
 }
@@ -253,23 +293,23 @@ mod test {
         assert_eq!(4, add(2, 2));
     }
 
-    fn cell_tester<C: ReferenceCell>() {
-        let c = C::new();
+    fn cell_tester(c: impl ReferenceCell) {
         assert_eq!(c.vertex_count(), c.vertices().len() / c.dim());
         assert_eq!(c.edge_count(), c.edges().len() / 2);
         assert_eq!(c.face_count(), c.faces_nvertices().len());
     }
 
-    #[test]
-    fn test_interval() {
-        cell_tester::<Interval>();
-    }
-
+    /*#[test]
+        fn test_interval() {
+            cell_tester::<Interval>();
+        }
+    */
     #[test]
     fn test_triangle() {
-        cell_tester::<Triangle>();
+        let t = Triangle {};
+        cell_tester(t);
     }
-
+    /*
     #[test]
     fn test_quadrilateral() {
         cell_tester::<Quadrilateral>();
@@ -284,4 +324,5 @@ mod test {
     fn test_prism() {
         cell_tester::<Prism>();
     }
+    */
 }
