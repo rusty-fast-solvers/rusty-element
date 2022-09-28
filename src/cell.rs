@@ -1,7 +1,9 @@
 //! Cell definitions
 
-pub mod triangle;
-pub use triangle::*;
+pub mod cells_1d;
+pub use cells_1d::*;
+pub mod cells_2d;
+pub use cells_2d::*;
 
 /// A 0- to 3- dimensional reference cell
 pub trait ReferenceCell {
@@ -52,84 +54,7 @@ pub trait ReferenceCell {
     ) -> Result<Vec<usize>, ()>;
 }
 
-/// The reference interval
-struct Interval;
-
-/// The reference quadrilateral
-struct Quadrilateral;
-
-/// The reference tetrahedron
-struct Tetrahedron;
-
-/// The reference prism
-struct Prism;
 /*
-impl ReferenceCell for Interval {
-
-    const DIM: usize = 1;
-    fn vertices(&self) -> Vec<f64> {
-        vec![0.0, 1.0]
-    }
-    fn edges(&self) -> Vec<usize> {
-        vec![0, 1]
-    }
-    fn faces(&self) -> Vec<usize> {
-        vec![]
-    }
-    fn faces_nvertices(&self) -> Vec<usize> {
-        vec![]
-    }
-    fn volumes(&self) -> Vec<usize> {
-        vec![]
-    }
-    fn vertex_count(&self) -> usize {
-        2
-    }
-    fn edge_count(&self) -> usize {
-        1
-    }
-    fn face_count(&self) -> usize {
-        0
-    }
-    fn volume_count(&self) -> usize {
-        0
-    }
-}
-*/
-
-/*
-impl ReferenceCell for Quadrilateral {
-
-    const DIM: usize = 2;
-    fn vertices(&self) -> Vec<f64> {
-        vec![0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 1.0, 1.0]
-    }
-    fn edges(&self) -> Vec<usize> {
-        vec![0, 1, 0, 2, 1, 3, 2, 3]
-    }
-    fn faces(&self) -> Vec<usize> {
-        vec![0, 1, 2, 3]
-    }
-    fn faces_nvertices(&self) -> Vec<usize> {
-        vec![4]
-    }
-    fn volumes(&self) -> Vec<usize> {
-        vec![]
-    }
-    fn vertex_count(&self) -> usize {
-        4
-    }
-    fn edge_count(&self) -> usize {
-        4
-    }
-    fn face_count(&self) -> usize {
-        1
-    }
-    fn volume_count(&self) -> usize {
-        0
-    }
-}
-
 impl ReferenceCell for Tetrahedron {
 
     const DIM: usize = 3;
@@ -206,30 +131,103 @@ mod test {
         assert_eq!(c.vertex_count(), c.vertices().len() / c.dim());
         assert_eq!(c.edge_count(), c.edges().len() / 2);
         assert_eq!(c.face_count(), c.faces_nvertices().len());
-        // TODO: test connectivity
+
+        for i in 0..c.vertex_count() {
+            let v = c.connectivity::<0, 0>(i).unwrap();
+            assert_eq!(v.len(), 1);
+            assert_eq!(v[0], i);
+            if c.dim() >= 1 {
+                let e = c.connectivity::<0, 1>(i).unwrap();
+                for j in e {
+                    let ev = c.connectivity::<1, 0>(j).unwrap();
+                    assert!(ev.contains(&i));
+                }
+            }
+            if c.dim() >= 2 {
+                let f = c.connectivity::<0, 2>(i).unwrap();
+                for j in f {
+                    let fv = c.connectivity::<2, 0>(j).unwrap();
+                    assert!(fv.contains(&i));
+                }
+            }
+            if c.dim() >= 3 {
+                let w = c.connectivity::<0, 3>(i).unwrap();
+                for j in w {
+                    let wv = c.connectivity::<3, 0>(j).unwrap();
+                    assert!(wv.contains(&i));
+                }
+            }
+        }
+        if c.dim() >= 1 {
+            for i in 0..c.edge_count() {
+                let e = c.connectivity::<1, 1>(i).unwrap();
+                assert_eq!(e.len(), 1);
+                assert_eq!(e[0], i);
+                let ev = c.connectivity::<1, 0>(i).unwrap();
+                if c.dim() >= 2 {
+                    let f = c.connectivity::<1, 2>(i).unwrap();
+                    for j in f {
+                        let fv = c.connectivity::<2, 0>(j).unwrap();
+                        assert!(fv.contains(&ev[0]));
+                        assert!(fv.contains(&ev[1]));
+                    }
+                }
+                if c.dim() >= 3 {
+                    let w = c.connectivity::<1, 3>(i).unwrap();
+                    for j in w {
+                        let wv = c.connectivity::<3, 0>(j).unwrap();
+                        assert!(wv.contains(&ev[0]));
+                        assert!(wv.contains(&ev[1]));
+                    }
+                }
+            }
+        }
+        if c.dim() >= 2 {
+            for i in 0..c.face_count() {
+                let f = c.connectivity::<2, 2>(i).unwrap();
+                assert_eq!(f.len(), 1);
+                assert_eq!(f[0], i);
+                let fv = c.connectivity::<2, 0>(i).unwrap();
+                if c.dim() >= 3 {
+                    let w = c.connectivity::<2, 3>(i).unwrap();
+                    for j in w {
+                        let wv = c.connectivity::<3, 0>(j).unwrap();
+                        for v in &fv {
+                            assert!(wv.contains(&v));
+                        }
+                    }
+                }
+            }
+        }
+        if c.dim() >= 3 {
+            let w = c.connectivity::<3, 3>(0).unwrap();
+            assert_eq!(w.len(), 1);
+            assert_eq!(w[0], 0);
+        }
     }
 
-    /*#[test]
-        fn test_interval() {
-            cell_tester::<Interval>();
-        }
-    */
+    #[test]
+    fn test_interval() {
+        let i = Interval {};
+        cell_tester(i);
+    }
     #[test]
     fn test_triangle() {
         let t = Triangle {};
         cell_tester(t);
     }
-    /*
     #[test]
     fn test_quadrilateral() {
-        cell_tester::<Quadrilateral>();
+        let q = Quadrilateral {};
+        cell_tester(q);
     }
 
     #[test]
     fn test_tetrahedron() {
-        cell_tester::<Tetrahedron>();
+        let t = Tetrahedron {};
+        cell_tester(t);
     }
-
+    /*
     #[test]
     fn test_prism() {
         cell_tester::<Prism>();
