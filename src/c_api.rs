@@ -23,6 +23,6 @@ pub extern "C" fn vertices(
         0 => get_element::<Triangle>(elem, elem_type),
         _ => panic!("Error"),
     };
-    unsafe {*nvertices = elem.unwrap().vertex_count() };
-    unsafe {*output = elem.unwrap().vertices().as_ptr() };
+    unsafe { *nvertices = elem.unwrap().vertex_count() };
+    unsafe { *output = elem.unwrap().vertices().as_ptr() };
 }

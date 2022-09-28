@@ -1,5 +1,4 @@
 /// The reference triangle
-
 use crate::cell::*;
 
 pub struct Triangle;
