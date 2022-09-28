@@ -25,17 +25,14 @@ jobs:
       - uses: actions/checkout@v2
       - name: Style checks
         run: |
-          cd rust
           rustup component add rustfmt
           cargo fmt -- --check
       - name: Build rust library
         run: |
-          cd rust
           cargo build
           cargo build --release
       - name: Run tests
         run: |
-          cd rust
           cargo test
   run-tests-python:
     name: Run tests (Python)

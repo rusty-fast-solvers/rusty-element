@@ -1,5 +1,6 @@
 use pyo3::prelude::*;
-mod cell;
+pub mod cell;
+pub mod c_api;
 
 #[pyfunction]
 #[pyo3(name = "add")]
