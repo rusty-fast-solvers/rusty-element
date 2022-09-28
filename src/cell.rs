@@ -57,38 +57,6 @@ pub trait ReferenceCell {
 }
 
 /*
-impl ReferenceCell for Tetrahedron {
-
-    const DIM: usize = 3;
-    fn vertices(&self) -> Vec<f64> {
-        vec![0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]
-    }
-    fn edges(&self) -> Vec<usize> {
-        vec![2, 3, 1, 3, 1, 2, 0, 3, 0, 2, 0, 1]
-    }
-    fn faces(&self) -> Vec<usize> {
-        vec![1, 2, 3, 0, 2, 3, 0, 1, 3, 0, 1, 2]
-    }
-    fn faces_nvertices(&self) -> Vec<usize> {
-        vec![3, 3, 3, 3]
-    }
-    fn volumes(&self) -> Vec<usize> {
-        vec![0, 1, 2, 3]
-    }
-    fn vertex_count(&self) -> usize {
-        4
-    }
-    fn edge_count(&self) -> usize {
-        6
-    }
-    fn face_count(&self) -> usize {
-        4
-    }
-    fn volume_count(&self) -> usize {
-        1
-    }
-}
-
 impl ReferenceCell for Prism {
 
     const DIM: usize = 3;
