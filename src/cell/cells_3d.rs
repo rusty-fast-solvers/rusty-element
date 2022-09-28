@@ -1,4 +1,5 @@
-/// Three-dimensional reference cells
+//! Three-dimensional reference cells
+
 use crate::cell::*;
 
 /// The reference tetrahedron

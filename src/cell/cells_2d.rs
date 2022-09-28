@@ -1,4 +1,5 @@
-/// Two-dimensional reference cells
+//! Two-dimensional reference cells
+
 use crate::cell::*;
 
 /// The reference triangle

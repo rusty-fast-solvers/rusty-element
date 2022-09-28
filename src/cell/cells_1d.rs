@@ -1,4 +1,5 @@
-/// One-dimensional reference cells
+//! One-dimensional reference cells
+
 use crate::cell::*;
 
 /// The reference interval
