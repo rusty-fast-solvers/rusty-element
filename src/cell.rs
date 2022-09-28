@@ -4,6 +4,8 @@ pub mod cells_1d;
 pub use cells_1d::*;
 pub mod cells_2d;
 pub use cells_2d::*;
+pub mod cells_3d;
+pub use cells_3d::*;
 
 /// A 0- to 3- dimensional reference cell
 pub trait ReferenceCell {

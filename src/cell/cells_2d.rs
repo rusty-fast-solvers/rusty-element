@@ -62,7 +62,12 @@ impl ReferenceCell for Triangle {
             1 => {
                 assert!(entity_number < 3);
                 match CONNECTED_DIM {
-                    0 => Ok(self.edges()[entity_number * 2..(entity_number + 1) * 2].to_vec()),
+                    0 => match entity_number {
+                        0 => Ok(vec![1, 2]),
+                        1 => Ok(vec![0, 2]),
+                        2 => Ok(vec![0, 1]),
+                        _ => Err(()),
+                    },
                     1 => Ok(vec![entity_number]),
                     2 => Ok(vec![0]),
                     _ => Err(()),
