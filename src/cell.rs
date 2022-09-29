@@ -34,6 +34,17 @@ pub trait ReferenceCell {
     /// The number of vertices adjacent to each face
     fn faces_nvertices(&self) -> &[usize];
 
+    /// The number of entities of dimension `dim`
+    fn entity_count(&self, dim: usize) -> Result<usize, ()> {
+        match dim {
+            0 => Ok(self.vertex_count()),
+            1 => Ok(self.edge_count()),
+            2 => Ok(self.face_count()),
+            3 => Ok(self.volume_count()),
+            _ => Err(()),
+        }
+    }
+
     /// The number of vertices
     fn vertex_count(&self) -> usize;
 
@@ -48,50 +59,15 @@ pub trait ReferenceCell {
 
     /// Get the entities connected to an entity
     ///
-    /// This function returns a list of entity numbers of entities of dimension CONNECTED_DIM that are attached to the entity numbered ENTITY_DIM of number entity_number.
-    /// For example connectivity<1, 2>(0) will return a list of faces (2D entities) that are connected to edge (1D entity) 0.
-    fn connectivity<const ENTITY_DIM: usize, const CONNECTED_DIM: usize>(
+    /// This function returns a list of entity numbers of entities of dimension `connected_dim` that are attached to the entity numbered `entity_dim` of number entity_number.
+    /// For example connectivity(1, 0, 2) will return a list of faces (2D entities) that are connected to edge (1D entity) 0.
+    fn connectivity(
         &self,
+        entity_dim: usize,
         entity_number: usize,
+        connected_dim: usize,
     ) -> Result<Vec<usize>, ()>;
 }
-
-/*
-impl ReferenceCell for Prism {
-
-    const DIM: usize = 3;
-    fn vertices(&self) -> Vec<f64> {
-        vec![
-            0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 1.0, 0.0, 1.0,
-            1.0,
-        ]
-    }
-    fn edges(&self) -> Vec<usize> {
-        vec![0, 1, 0, 2, 0, 4, 1, 2, 1, 5, 2, 6, 3, 4, 3, 5, 4, 5]
-    }
-    fn faces(&self) -> Vec<usize> {
-        vec![0, 1, 2, 0, 1, 3, 4, 0, 2, 3, 5, 1, 2, 4, 5, 3, 4, 5]
-    }
-    fn faces_nvertices(&self) -> Vec<usize> {
-        vec![3, 4, 4, 4, 3]
-    }
-    fn volumes(&self) -> Vec<usize> {
-        vec![0, 1, 2, 3, 4, 5]
-    }
-    fn vertex_count(&self) -> usize {
-        6
-    }
-    fn edge_count(&self) -> usize {
-        9
-    }
-    fn face_count(&self) -> usize {
-        5
-    }
-    fn volume_count(&self) -> usize {
-        1
-    }
-}
-*/
 
 #[cfg(test)]
 mod test {
@@ -102,77 +78,51 @@ mod test {
         assert_eq!(c.edge_count(), c.edges().len() / 2);
         assert_eq!(c.face_count(), c.faces_nvertices().len());
 
-        for i in 0..c.vertex_count() {
-            let v = c.connectivity::<0, 0>(i).unwrap();
-            assert_eq!(v.len(), 1);
-            assert_eq!(v[0], i);
-            if c.dim() >= 1 {
-                let e = c.connectivity::<0, 1>(i).unwrap();
-                for j in e {
-                    let ev = c.connectivity::<1, 0>(j).unwrap();
-                    assert!(ev.contains(&i));
-                }
-            }
-            if c.dim() >= 2 {
-                let f = c.connectivity::<0, 2>(i).unwrap();
-                for j in f {
-                    let fv = c.connectivity::<2, 0>(j).unwrap();
-                    assert!(fv.contains(&i));
-                }
-            }
-            if c.dim() >= 3 {
-                let w = c.connectivity::<0, 3>(i).unwrap();
-                for j in w {
-                    let wv = c.connectivity::<3, 0>(j).unwrap();
-                    assert!(wv.contains(&i));
-                }
-            }
+        for v_n in 0..c.vertex_count() {
+            let v = c.connectivity(0, v_n, 0).unwrap();
+            assert_eq!(v[0], v_n);
         }
-        if c.dim() >= 1 {
-            for i in 0..c.edge_count() {
-                let e = c.connectivity::<1, 1>(i).unwrap();
-                assert_eq!(e.len(), 1);
-                assert_eq!(e[0], i);
-                let ev = c.connectivity::<1, 0>(i).unwrap();
-                if c.dim() >= 2 {
-                    let f = c.connectivity::<1, 2>(i).unwrap();
-                    for j in f {
-                        let fv = c.connectivity::<2, 0>(j).unwrap();
-                        assert!(fv.contains(&ev[0]));
-                        assert!(fv.contains(&ev[1]));
-                    }
-                }
-                if c.dim() >= 3 {
-                    let w = c.connectivity::<1, 3>(i).unwrap();
-                    for j in w {
-                        let wv = c.connectivity::<3, 0>(j).unwrap();
-                        assert!(wv.contains(&ev[0]));
-                        assert!(wv.contains(&ev[1]));
-                    }
-                }
-            }
+        for e_n in 0..c.edge_count() {
+            let v = c.connectivity(1, e_n, 0).unwrap();
+            let edge = &c.edges()[2 * e_n..2 * (e_n + 1)];
+            assert_eq!(v, edge);
         }
-        if c.dim() >= 2 {
-            for i in 0..c.face_count() {
-                let f = c.connectivity::<2, 2>(i).unwrap();
-                assert_eq!(f.len(), 1);
-                assert_eq!(f[0], i);
-                let fv = c.connectivity::<2, 0>(i).unwrap();
-                if c.dim() >= 3 {
-                    let w = c.connectivity::<2, 3>(i).unwrap();
-                    for j in w {
-                        let wv = c.connectivity::<3, 0>(j).unwrap();
-                        for v in &fv {
-                            assert!(wv.contains(&v));
+        let mut start = 0;
+        for f_n in 0..c.face_count() {
+            let v = c.connectivity(2, f_n, 0).unwrap();
+            let face = &c.faces()[start..start + c.faces_nvertices()[f_n]];
+            assert_eq!(v, face);
+            start += c.faces_nvertices()[f_n];
+        }
+
+        for e_dim in 0..c.dim() + 1 {
+            for e_n in 0..c.entity_count(e_dim).unwrap() {
+                let e_vertices = c.connectivity(e_dim, e_n, 0).unwrap();
+                for c_dim in 0..c.dim() + 1 {
+                    let connectivity = c.connectivity(e_dim, e_n, c_dim).unwrap();
+                    if e_dim == c_dim {
+                        assert_eq!(connectivity.len(), 1);
+                        assert_eq!(connectivity[0], e_n)
+                    } else {
+                        for c_n in &connectivity {
+                            let c_vertices = c.connectivity(c_dim, *c_n, 0).unwrap();
+                            println!("{} {} {} {}", e_dim, e_n, c_dim, c_n);
+                            if e_dim < c_dim {
+                                for i in &e_vertices {
+                                    println!(" c {}", i);
+                                    assert!(c_vertices.contains(&i));
+                                }
+                            } else {
+                                for i in &c_vertices {
+                                    println!(" e {}", i);
+                                    assert!(e_vertices.contains(&i));
+                                }
+                            }
+                            assert!(connectivity.contains(&c_n));
                         }
                     }
                 }
             }
-        }
-        if c.dim() >= 3 {
-            let w = c.connectivity::<3, 3>(0).unwrap();
-            assert_eq!(w.len(), 1);
-            assert_eq!(w[0], 0);
         }
     }
 
@@ -191,16 +141,24 @@ mod test {
         let q = Quadrilateral {};
         cell_tester(q);
     }
-
     #[test]
     fn test_tetrahedron() {
         let t = Tetrahedron {};
         cell_tester(t);
     }
-    /*
+    #[test]
+    fn test_hexahedron() {
+        let h = Hexahedron {};
+        cell_tester(h);
+    }
     #[test]
     fn test_prism() {
-        cell_tester::<Prism>();
+        let p = Prism {};
+        cell_tester(p);
     }
-    */
+    #[test]
+    fn test_pyramid() {
+        let p = Pyramid {};
+        cell_tester(p);
+    }
 }

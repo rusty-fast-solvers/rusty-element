@@ -38,14 +38,16 @@ impl ReferenceCell for Interval {
     fn volume_count(&self) -> usize {
         0
     }
-    fn connectivity<const ENTITY_DIM: usize, const CONNECTED_DIM: usize>(
+    fn connectivity(
         &self,
+        entity_dim: usize,
         entity_number: usize,
+        connected_dim: usize,
     ) -> Result<Vec<usize>, ()> {
-        match ENTITY_DIM {
+        match entity_dim {
             0 => {
                 assert!(entity_number < 2);
-                match CONNECTED_DIM {
+                match connected_dim {
                     0 => Ok(vec![entity_number]),
                     1 => Ok(vec![0]),
                     _ => Err(()),
@@ -53,7 +55,7 @@ impl ReferenceCell for Interval {
             }
             1 => {
                 assert!(entity_number == 0);
-                match CONNECTED_DIM {
+                match connected_dim {
                     0 => Ok(vec![0, 1]),
                     1 => Ok(vec![0]),
                     _ => Err(()),
