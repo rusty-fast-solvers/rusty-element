@@ -41,14 +41,16 @@ impl ReferenceCell for Triangle {
     fn volume_count(&self) -> usize {
         0
     }
-    fn connectivity<const ENTITY_DIM: usize, const CONNECTED_DIM: usize>(
+    fn connectivity(
         &self,
+        entity_dim: usize,
         entity_number: usize,
+        connected_dim: usize,
     ) -> Result<Vec<usize>, ()> {
-        match ENTITY_DIM {
+        match entity_dim {
             0 => {
                 assert!(entity_number < 3);
-                match CONNECTED_DIM {
+                match connected_dim {
                     0 => Ok(vec![entity_number]),
                     1 => match entity_number {
                         0 => Ok(vec![1, 2]),
@@ -62,7 +64,7 @@ impl ReferenceCell for Triangle {
             }
             1 => {
                 assert!(entity_number < 3);
-                match CONNECTED_DIM {
+                match connected_dim {
                     0 => match entity_number {
                         0 => Ok(vec![1, 2]),
                         1 => Ok(vec![0, 2]),
@@ -76,7 +78,7 @@ impl ReferenceCell for Triangle {
             }
             2 => {
                 assert!(entity_number == 0);
-                match CONNECTED_DIM {
+                match connected_dim {
                     0 => Ok(vec![0, 1, 2]),
                     1 => Ok(vec![0, 1, 2]),
                     2 => Ok(vec![0]),
@@ -121,14 +123,16 @@ impl ReferenceCell for Quadrilateral {
     fn volume_count(&self) -> usize {
         0
     }
-    fn connectivity<const ENTITY_DIM: usize, const CONNECTED_DIM: usize>(
+    fn connectivity(
         &self,
+        entity_dim: usize,
         entity_number: usize,
+        connected_dim: usize,
     ) -> Result<Vec<usize>, ()> {
-        match ENTITY_DIM {
+        match entity_dim {
             0 => {
                 assert!(entity_number < 4);
-                match CONNECTED_DIM {
+                match connected_dim {
                     0 => Ok(vec![entity_number]),
                     1 => match entity_number {
                         0 => Ok(vec![0, 1]),
@@ -143,7 +147,7 @@ impl ReferenceCell for Quadrilateral {
             }
             1 => {
                 assert!(entity_number < 4);
-                match CONNECTED_DIM {
+                match connected_dim {
                     0 => Ok(self.edges()[entity_number * 2..(entity_number + 1) * 2].to_vec()),
                     1 => Ok(vec![entity_number]),
                     2 => Ok(vec![0]),
@@ -152,7 +156,7 @@ impl ReferenceCell for Quadrilateral {
             }
             2 => {
                 assert!(entity_number == 0);
-                match CONNECTED_DIM {
+                match connected_dim {
                     0 => Ok(vec![0, 1, 2, 3]),
                     1 => Ok(vec![0, 1, 2, 3]),
                     2 => Ok(vec![0]),
