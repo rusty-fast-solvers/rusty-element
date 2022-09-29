@@ -432,3 +432,136 @@ impl ReferenceCell for Prism {
         }
     }
 }
+
+impl ReferenceCell for Pyramid {
+    const DIM: usize = 3;
+    fn vertices(&self) -> &[f64] {
+        static VERTICES: [f64; 15] = [
+            0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 1.0,
+        ];
+        &VERTICES
+    }
+
+    fn edges(&self) -> &[usize] {
+        static EDGES: [usize; 16] = [0, 1, 0, 2, 0, 4, 1, 3, 1, 4, 2, 3, 2, 4, 3, 4];
+        &EDGES
+    }
+    fn faces(&self) -> &[usize] {
+        static FACES: [usize; 16] = [0, 1, 2, 3, 0, 1, 4, 0, 2, 4, 1, 3, 4, 2, 3, 4];
+        &FACES
+    }
+    fn faces_nvertices(&self) -> &[usize] {
+        static FACES_NV: [usize; 5] = [4, 3, 3, 3, 3];
+        &FACES_NV
+    }
+    fn vertex_count(&self) -> usize {
+        5
+    }
+    fn edge_count(&self) -> usize {
+        8
+    }
+    fn face_count(&self) -> usize {
+        5
+    }
+    fn volume_count(&self) -> usize {
+        1
+    }
+    fn connectivity(
+        &self,
+        entity_dim: usize,
+        entity_number: usize,
+        connected_dim: usize,
+    ) -> Result<Vec<usize>, ()> {
+        match entity_dim {
+            0 => {
+                assert!(entity_number < 5);
+                match connected_dim {
+                    0 => Ok(vec![entity_number]),
+                    1 => match entity_number {
+                        0 => Ok(vec![0, 1, 2]),
+                        1 => Ok(vec![0, 3, 4]),
+                        2 => Ok(vec![1, 5, 6]),
+                        3 => Ok(vec![3, 5, 7]),
+                        4 => Ok(vec![2, 4, 6, 7]),
+                        _ => Err(()),
+                    },
+                    2 => match entity_number {
+                        0 => Ok(vec![0, 1, 2]),
+                        1 => Ok(vec![0, 1, 3]),
+                        2 => Ok(vec![0, 2, 4]),
+                        3 => Ok(vec![0, 3, 4]),
+                        4 => Ok(vec![1, 2, 3, 4]),
+                        _ => Err(()),
+                    },
+                    3 => Ok(vec![0]),
+                    _ => Err(()),
+                }
+            }
+            1 => {
+                assert!(entity_number < 8);
+                match connected_dim {
+                    0 => match entity_number {
+                        0 => Ok(vec![0, 1]),
+                        1 => Ok(vec![0, 2]),
+                        2 => Ok(vec![0, 4]),
+                        3 => Ok(vec![1, 3]),
+                        4 => Ok(vec![1, 4]),
+                        5 => Ok(vec![2, 3]),
+                        6 => Ok(vec![2, 4]),
+                        7 => Ok(vec![3, 4]),
+                        _ => Err(()),
+                    },
+                    1 => Ok(vec![entity_number]),
+                    2 => match entity_number {
+                        0 => Ok(vec![0, 1]),
+                        1 => Ok(vec![0, 2]),
+                        2 => Ok(vec![1, 2]),
+                        3 => Ok(vec![0, 3]),
+                        4 => Ok(vec![1, 3]),
+                        5 => Ok(vec![0, 4]),
+                        6 => Ok(vec![2, 4]),
+                        7 => Ok(vec![3, 4]),
+                        _ => Err(()),
+                    },
+                    3 => Ok(vec![0]),
+                    _ => Err(()),
+                }
+            }
+            2 => {
+                assert!(entity_number < 5);
+                match connected_dim {
+                    0 => match entity_number {
+                        0 => Ok(vec![0, 1, 2, 3]),
+                        1 => Ok(vec![0, 1, 4]),
+                        2 => Ok(vec![0, 2, 4]),
+                        3 => Ok(vec![1, 3, 4]),
+                        4 => Ok(vec![2, 3, 4]),
+                        _ => Err(()),
+                    },
+                    1 => match entity_number {
+                        0 => Ok(vec![0, 1, 3, 5]),
+                        1 => Ok(vec![0, 2, 4]),
+                        2 => Ok(vec![1, 2, 6]),
+                        3 => Ok(vec![3, 4, 7]),
+                        4 => Ok(vec![5, 6, 7]),
+                        _ => Err(()),
+                    },
+                    2 => Ok(vec![entity_number]),
+                    3 => Ok(vec![0]),
+                    _ => Err(()),
+                }
+            }
+            3 => {
+                assert!(entity_number == 0);
+                match connected_dim {
+                    0 => Ok(vec![0, 1, 2, 3, 4]),
+                    1 => Ok(vec![0, 1, 2, 3, 4, 5, 6, 7]),
+                    2 => Ok(vec![0, 1, 2, 3, 4]),
+                    3 => Ok(vec![0]),
+                    _ => Err(()),
+                }
+            }
+            _ => Err(()),
+        }
+    }
+}

@@ -156,4 +156,9 @@ mod test {
         let p = Prism {};
         cell_tester(p);
     }
+    #[test]
+    fn test_pyramid() {
+        let p = Pyramid {};
+        cell_tester(p);
+    }
 }
