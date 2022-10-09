@@ -15,7 +15,18 @@ pub struct Prism;
 pub struct Pyramid;
 
 impl ReferenceCell for Tetrahedron {
-    const DIM: usize = 3;
+    fn dim(&self) -> usize {
+        3
+    }
+
+    fn cell_type(&self) -> ReferenceCellType {
+        ReferenceCellType::Tetrahedron
+    }
+
+    fn label(&self) -> &'static str {
+        "tetrahedron"
+    }
+
     fn vertices(&self) -> &[f64] {
         static VERTICES: [f64; 12] = [0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0];
         &VERTICES
@@ -140,7 +151,18 @@ impl ReferenceCell for Tetrahedron {
 }
 
 impl ReferenceCell for Hexahedron {
-    const DIM: usize = 3;
+    fn dim(&self) -> usize {
+        3
+    }
+
+    fn cell_type(&self) -> ReferenceCellType {
+        ReferenceCellType::Hexahedron
+    }
+
+    fn label(&self) -> &'static str {
+        "hexahedron"
+    }
+
     fn vertices(&self) -> &[f64] {
         static VERTICES: [f64; 24] = [
             0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0,
@@ -296,7 +318,18 @@ impl ReferenceCell for Hexahedron {
 }
 
 impl ReferenceCell for Prism {
-    const DIM: usize = 3;
+    fn dim(&self) -> usize {
+        3
+    }
+
+    fn cell_type(&self) -> ReferenceCellType {
+        ReferenceCellType::Prism
+    }
+
+    fn label(&self) -> &'static str {
+        "prism"
+    }
+
     fn vertices(&self) -> &[f64] {
         static VERTICES: [f64; 18] = [
             0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 1.0, 0.0, 1.0,
@@ -434,7 +467,18 @@ impl ReferenceCell for Prism {
 }
 
 impl ReferenceCell for Pyramid {
-    const DIM: usize = 3;
+    fn dim(&self) -> usize {
+        3
+    }
+
+    fn cell_type(&self) -> ReferenceCellType {
+        ReferenceCellType::Pyramid
+    }
+
+    fn label(&self) -> &'static str {
+        "pyramid"
+    }
+
     fn vertices(&self) -> &[f64] {
         static VERTICES: [f64; 15] = [
             0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 1.0,

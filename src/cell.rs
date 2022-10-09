@@ -7,14 +7,23 @@ pub use cells_2d::*;
 pub mod cells_3d;
 pub use cells_3d::*;
 
+#[derive(Debug, PartialEq, Clone, Copy)]
+#[repr(u8)]
+pub enum ReferenceCellType {
+    Interval = 0,
+    Triangle = 1,
+    Quadrilateral = 2,
+    Tetrahedron = 3,
+    Hexahedron = 4,
+    Prism = 5,
+    Pyramid = 6,
+}
+
 /// A 0- to 3- dimensional reference cell
 pub trait ReferenceCell {
-    const DIM: usize;
 
     /// The dimension of the reference cell (eg a triangle's dimension is 2, tetrahedron's dimension is 3)
-    fn dim(&self) -> usize {
-        Self::DIM
-    }
+    fn dim(&self) -> usize;
 
     /// The vertices of the cell
     ///
@@ -67,98 +76,96 @@ pub trait ReferenceCell {
         entity_number: usize,
         connected_dim: usize,
     ) -> Result<Vec<usize>, ()>;
+
+    /// The reference cell type
+    fn cell_type(&self) -> ReferenceCellType;
+
+    /// The reference cell label
+    fn label(&self) -> &'static str;
 }
 
 #[cfg(test)]
 mod test {
     use crate::cell::*;
+    use paste::paste;
 
-    fn cell_tester(c: impl ReferenceCell) {
-        assert_eq!(c.vertex_count(), c.vertices().len() / c.dim());
-        assert_eq!(c.edge_count(), c.edges().len() / 2);
-        assert_eq!(c.face_count(), c.faces_nvertices().len());
+    macro_rules! test_cell {
 
-        for v_n in 0..c.vertex_count() {
-            let v = c.connectivity(0, v_n, 0).unwrap();
-            assert_eq!(v[0], v_n);
-        }
-        for e_n in 0..c.edge_count() {
-            let v = c.connectivity(1, e_n, 0).unwrap();
-            let edge = &c.edges()[2 * e_n..2 * (e_n + 1)];
-            assert_eq!(v, edge);
-        }
-        let mut start = 0;
-        for f_n in 0..c.face_count() {
-            let v = c.connectivity(2, f_n, 0).unwrap();
-            let face = &c.faces()[start..start + c.faces_nvertices()[f_n]];
-            assert_eq!(v, face);
-            start += c.faces_nvertices()[f_n];
-        }
+        ($($cell:ident),+) => {
 
-        for e_dim in 0..c.dim() + 1 {
-            for e_n in 0..c.entity_count(e_dim).unwrap() {
-                let e_vertices = c.connectivity(e_dim, e_n, 0).unwrap();
-                for c_dim in 0..c.dim() + 1 {
-                    let connectivity = c.connectivity(e_dim, e_n, c_dim).unwrap();
-                    if e_dim == c_dim {
-                        assert_eq!(connectivity.len(), 1);
-                        assert_eq!(connectivity[0], e_n)
-                    } else {
-                        for c_n in &connectivity {
-                            let c_vertices = c.connectivity(c_dim, *c_n, 0).unwrap();
-                            println!("{} {} {} {}", e_dim, e_n, c_dim, c_n);
-                            if e_dim < c_dim {
-                                for i in &e_vertices {
-                                    println!(" c {}", i);
-                                    assert!(c_vertices.contains(&i));
-                                }
-                            } else {
-                                for i in &c_vertices {
-                                    println!(" e {}", i);
-                                    assert!(e_vertices.contains(&i));
+        $(
+            paste! {
+
+                #[test]
+                fn [<test_ $cell:lower>]() {
+                    let c = [<$cell>] {};
+                    assert_eq!(c.cell_type(), ReferenceCellType::[<$cell>]);
+                    assert_eq!(c.label(), stringify!([<$cell:lower>]));
+                    assert_eq!(c.vertex_count(), c.vertices().len() / c.dim());
+                    assert_eq!(c.edge_count(), c.edges().len() / 2);
+                    assert_eq!(c.face_count(), c.faces_nvertices().len());
+
+                    for v_n in 0..c.vertex_count() {
+                        let v = c.connectivity(0, v_n, 0).unwrap();
+                        assert_eq!(v[0], v_n);
+                    }
+                    for e_n in 0..c.edge_count() {
+                        let v = c.connectivity(1, e_n, 0).unwrap();
+                        let edge = &c.edges()[2 * e_n..2 * (e_n + 1)];
+                        assert_eq!(v, edge);
+                    }
+                    let mut start = 0;
+                    for f_n in 0..c.face_count() {
+                        let v = c.connectivity(2, f_n, 0).unwrap();
+                        let face = &c.faces()[start..start + c.faces_nvertices()[f_n]];
+                        assert_eq!(v, face);
+                        start += c.faces_nvertices()[f_n];
+                    }
+
+                    for e_dim in 0..c.dim() + 1 {
+                        for e_n in 0..c.entity_count(e_dim).unwrap() {
+                            let e_vertices = c.connectivity(e_dim, e_n, 0).unwrap();
+                            for c_dim in 0..c.dim() + 1 {
+                                let connectivity = c.connectivity(e_dim, e_n, c_dim).unwrap();
+                                if e_dim == c_dim {
+                                    assert_eq!(connectivity.len(), 1);
+                                    assert_eq!(connectivity[0], e_n)
+                                } else {
+                                    for c_n in &connectivity {
+                                        let c_vertices = c.connectivity(c_dim, *c_n, 0).unwrap();
+                                        println!("{} {} {} {}", e_dim, e_n, c_dim, c_n);
+                                        if e_dim < c_dim {
+                                            for i in &e_vertices {
+                                                println!(" c {}", i);
+                                                assert!(c_vertices.contains(&i));
+                                            }
+                                        } else {
+                                            for i in &c_vertices {
+                                                println!(" e {}", i);
+                                                assert!(e_vertices.contains(&i));
+                                            }
+                                        }
+                                        assert!(connectivity.contains(&c_n));
+                                    }
                                 }
                             }
-                            assert!(connectivity.contains(&c_n));
                         }
                     }
+
                 }
+
             }
-        }
+        )*
+        };
     }
 
-    #[test]
-    fn test_interval() {
-        let i = Interval {};
-        cell_tester(i);
-    }
-    #[test]
-    fn test_triangle() {
-        let t = Triangle {};
-        cell_tester(t);
-    }
-    #[test]
-    fn test_quadrilateral() {
-        let q = Quadrilateral {};
-        cell_tester(q);
-    }
-    #[test]
-    fn test_tetrahedron() {
-        let t = Tetrahedron {};
-        cell_tester(t);
-    }
-    #[test]
-    fn test_hexahedron() {
-        let h = Hexahedron {};
-        cell_tester(h);
-    }
-    #[test]
-    fn test_prism() {
-        let p = Prism {};
-        cell_tester(p);
-    }
-    #[test]
-    fn test_pyramid() {
-        let p = Pyramid {};
-        cell_tester(p);
-    }
+    test_cell!(
+        Interval,
+        Triangle,
+        Quadrilateral,
+        Tetrahedron,
+        Hexahedron,
+        Prism,
+        Pyramid
+    );
 }

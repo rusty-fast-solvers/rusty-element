@@ -6,7 +6,19 @@ use crate::cell::*;
 pub struct Interval;
 
 impl ReferenceCell for Interval {
-    const DIM: usize = 1;
+
+    fn dim(&self) -> usize {
+        1
+    }
+
+    fn cell_type(&self) -> ReferenceCellType {
+        ReferenceCellType::Interval
+    }
+
+    fn label(&self) -> &'static str {
+        "interval"
+    }
+
     fn vertices(&self) -> &[f64] {
         static VERTICES: [f64; 2] = [0.0, 1.0];
         &VERTICES

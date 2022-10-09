@@ -1,0 +1,6 @@
+language = "C"
+
+[parse]
+parse_deps = true
+include = ["rusty-cffi"]
+extra_bindings = ["rusty-cffi"]

@@ -9,7 +9,18 @@ pub struct Triangle;
 pub struct Quadrilateral;
 
 impl ReferenceCell for Triangle {
-    const DIM: usize = 2;
+    fn dim(&self) -> usize {
+        2
+    }
+
+    fn cell_type(&self) -> ReferenceCellType {
+        ReferenceCellType::Triangle
+    }
+
+    fn label(&self) -> &'static str {
+        "triangle"
+    }
+
     fn vertices(&self) -> &[f64] {
         static VERTICES: [f64; 6] = [0.0, 0.0, 1.0, 0.0, 0.0, 1.0];
         &VERTICES
@@ -91,7 +102,18 @@ impl ReferenceCell for Triangle {
 }
 
 impl ReferenceCell for Quadrilateral {
-    const DIM: usize = 2;
+    fn dim(&self) -> usize {
+        2
+    }
+
+    fn cell_type(&self) -> ReferenceCellType {
+        ReferenceCellType::Quadrilateral
+    }
+
+    fn label(&self) -> &'static str {
+        "quadrilateral"
+    }
+
     fn vertices(&self) -> &[f64] {
         static VERTICES: [f64; 8] = [0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 1.0, 1.0];
         &VERTICES
