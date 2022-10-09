@@ -101,9 +101,9 @@ mod test {
                     let c = [<$cell>] {};
                     assert_eq!(c.cell_type(), ReferenceCellType::[<$cell>]);
                     assert_eq!(c.label(), stringify!([<$cell:lower>]));
-                    assert_eq!(c.vertex_count(), c.vertices().len() / c.dim());
-                    assert_eq!(c.edge_count(), c.edges().len() / 2);
-                    assert_eq!(c.face_count(), c.faces_nvertices().len());
+                    assert_eq!(c.vertex_count() as usize, c.vertices().len() / (c.dim() as usize));
+                    assert_eq!(c.edge_count() as usize, c.edges().len() / 2);
+                    assert_eq!(c.face_count() as usize, c.faces_nvertices().len());
 
                     for v_n in 0..c.vertex_count() {
                         let v = c.connectivity(0, v_n, 0).unwrap();
@@ -111,15 +111,15 @@ mod test {
                     }
                     for e_n in 0..c.edge_count() {
                         let v = c.connectivity(1, e_n, 0).unwrap();
-                        let edge = &c.edges()[2 * e_n..2 * (e_n + 1)];
+                        let edge = &c.edges()[2 * (e_n as usize)..2 * ((e_n as usize) + 1)];
                         assert_eq!(v, edge);
                     }
                     let mut start = 0;
                     for f_n in 0..c.face_count() {
                         let v = c.connectivity(2, f_n, 0).unwrap();
-                        let face = &c.faces()[start..start + c.faces_nvertices()[f_n]];
+                        let face = &c.faces()[start..start + (c.faces_nvertices()[f_n as usize] as usize)];
                         assert_eq!(v, face);
-                        start += c.faces_nvertices()[f_n];
+                        start += (c.faces_nvertices()[f_n as usize] as usize);
                     }
 
                     for e_dim in 0..c.dim() + 1 {

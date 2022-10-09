@@ -1,6 +1,14 @@
+[project]
+name = "rusty-element"
+version = "0.1.0"
+dependencies = ["cffi"]
+
 [tool.maturin]
 python-source = "python"
 
 [build-system]
-requires = ["maturin>=0.13,<0.14"]
+requires = ["setuptools", "wheel"]
 build-backend = "maturin"
+
+[tool.black]
+preview = true

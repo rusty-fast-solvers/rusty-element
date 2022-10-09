@@ -16,7 +16,6 @@ name = "rusty_element"
 crate-type = ["lib", "cdylib"]
 
 [dependencies]
-rusty-cffi = {path = "/Users/betcke/projects/rusty-cffi"}
-# rusty-cffi = {git = "https://github.com/rusty-fast-solvers/rusty-cffi"}
+rusty-cffi = "0.0.2"
 paste = "1.*"
 libc = "0.2"
