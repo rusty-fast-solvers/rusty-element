@@ -7,7 +7,7 @@ pub use cells_2d::*;
 pub mod cells_3d;
 pub use cells_3d::*;
 
-#[derive(Debug, PartialEq, Clone, Copy)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
 #[repr(u8)]
 pub enum ReferenceCellType {
     Interval = 0,
