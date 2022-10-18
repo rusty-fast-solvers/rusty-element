@@ -1,11 +1,25 @@
 //! Finite Element definitions
 
-use crate::cell;
+use crate::cell::*;
 pub mod lagrange;
 pub use lagrange::*;
 
-/// A 0- to 3- dimensional reference cell
+#[derive(Debug, PartialEq, Eq, Clone, Copy, Hash)]
+#[repr(u8)]
+pub enum ElementFamily{
+    Lagrange = 0,
+}
+
+/// A finite element
 pub trait FiniteElement {
+    const VALUE_SIZE: usize;
+    fn cell_type(&self) -> ReferenceCellType;
+    fn degree(&self) -> usize;
+    fn highest_degree(&self) -> usize;
+    fn family(&self) -> ElementFamily;
+    fn discontinuous(&self) -> bool;
+
+    fn value_size(&self) -> usize { Self::VALUE_SIZE }
 }
 
 #[cfg(test)]
@@ -19,5 +33,6 @@ mod test {
             celltype: ReferenceCellType::Triangle,
             degree: 1
         };
+        assert_eq!(e.value_size(), 1);
     }
 }
