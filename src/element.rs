@@ -6,7 +6,7 @@ pub use lagrange::*;
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy, Hash)]
 #[repr(u8)]
-pub enum ElementFamily{
+pub enum ElementFamily {
     Lagrange = 0,
 }
 
@@ -19,7 +19,11 @@ pub trait FiniteElement {
     fn family(&self) -> ElementFamily;
     fn discontinuous(&self) -> bool;
 
-    fn value_size(&self) -> usize { Self::VALUE_SIZE }
+    fn value_size(&self) -> usize {
+        Self::VALUE_SIZE
+    }
+
+    // fn tabulate(&self, points: &[f64], nderivs: usize) -> &[f64];
 }
 
 #[cfg(test)]
@@ -29,9 +33,9 @@ mod test {
 
     #[test]
     fn test_lagrange_1() {
-        let e = LagrangeElement{
+        let e = LagrangeElement {
             celltype: ReferenceCellType::Triangle,
-            degree: 1
+            degree: 1,
         };
         assert_eq!(e.value_size(), 1);
     }
