@@ -16,3 +16,7 @@ python/rusty_element/rusty_element
 __pycache__/
 *.py[cod]
 *.so
+
+*.egg-info
+python/build
+
