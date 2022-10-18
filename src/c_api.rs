@@ -12,7 +12,6 @@ impl ReferenceCellContainer {
     }
 }
 
-
 // get_cell_property_impl!(dim, size_t);
 
 fn get_reference(
@@ -163,6 +162,3 @@ pub extern "C" fn reference_cell_container_get_cell_type(
 ) -> ReferenceCellType {
     get_reference(cell_container).cell_type()
 }
-
-
-

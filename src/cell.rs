@@ -21,7 +21,6 @@ pub enum ReferenceCellType {
 
 /// A 0- to 3- dimensional reference cell
 pub trait ReferenceCell {
-
     /// The dimension of the reference cell (eg a triangle's dimension is 2, tetrahedron's dimension is 3)
     fn dim(&self) -> usize;
 

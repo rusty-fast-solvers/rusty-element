@@ -6,7 +6,6 @@ use crate::cell::*;
 pub struct Interval;
 
 impl ReferenceCell for Interval {
-
     fn dim(&self) -> usize {
         1
     }
