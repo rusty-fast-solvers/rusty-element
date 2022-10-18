@@ -1,7 +1,7 @@
 """Data structures for cell descriptions."""
 
 import rusty_cffi
-from .config import get_ffi, get_lib
+from .config import get_lib
 
 
 class ReferenceCell:

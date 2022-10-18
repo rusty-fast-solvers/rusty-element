@@ -56,4 +56,4 @@ jobs:
           cd python
           pip3 install .
       - name: Run tests
-        run: python3 -m pytest .
+        run: python3 -m pytest python/test
