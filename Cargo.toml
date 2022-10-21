@@ -19,3 +19,4 @@ crate-type = ["lib", "cdylib"]
 rusty-cffi = "0.0.2"
 paste = "1.*"
 libc = "0.2"
+approx = "0.3.2"
