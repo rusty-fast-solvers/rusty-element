@@ -91,7 +91,6 @@ impl<'a, F: FiniteElement> TabulatedData<'a, F> {
 
 #[cfg(test)]
 mod test {
-    use crate::cell::*;
     use crate::element::*;
 
     #[test]
