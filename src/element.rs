@@ -25,6 +25,8 @@ pub trait FiniteElement: Sized {
     }
 
     fn tabulate(&self, points: &[f64], nderivs: usize, data: &mut TabulatedData<Self>);
+
+    fn entity_dofs(&self, entity_dim: usize, entity_number: usize) -> Vec<usize>;
 }
 
 pub struct TabulatedData<'a, F: FiniteElement> {

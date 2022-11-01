@@ -1,6 +1,5 @@
 //! Lagrange elements
 
-use crate::cell::*;
 use crate::element::*;
 
 /// Lagrange element
@@ -31,6 +30,9 @@ impl FiniteElement for LagrangeElement {
     }
     fn tabulate(&self, points: &[f64], nderivs: usize, data: &mut TabulatedData<Self>) {
         unimplemented!("tabulate not yet implemented for this element");
+    }
+    fn entity_dofs(&self, entity_dim: usize, entity_number: usize) -> Vec<usize> {
+        unimplemented!("entity_dofs not yet implemented for this element");
     }
 }
 
@@ -67,6 +69,13 @@ impl FiniteElement for LagrangeElementIntervalDegree0 {
                     *data.get_mut(deriv, pt, 0, 0) = 0.;
                 }
             }
+        }
+    }
+    fn entity_dofs(&self, entity_dim: usize, entity_number: usize) -> Vec<usize> {
+        if entity_dim == 1 && entity_number == 0 {
+            vec![0]
+        } else {
+            vec![]
         }
     }
 }
@@ -112,6 +121,13 @@ impl FiniteElement for LagrangeElementIntervalDegree1 {
             }
         }
     }
+    fn entity_dofs(&self, entity_dim: usize, entity_number: usize) -> Vec<usize> {
+        if entity_dim == 0 {
+            vec![entity_number]
+        } else {
+            vec![]
+        }
+    }
 }
 
 /// Degree 0 Lagrange element on a triangle
@@ -147,6 +163,13 @@ impl FiniteElement for LagrangeElementTriangleDegree0 {
                     *data.get_mut(deriv, pt, 0, 0) = 0.;
                 }
             }
+        }
+    }
+    fn entity_dofs(&self, entity_dim: usize, entity_number: usize) -> Vec<usize> {
+        if entity_dim == 2 && entity_number == 0 {
+            vec![0]
+        } else {
+            vec![]
         }
     }
 }
@@ -198,6 +221,13 @@ impl FiniteElement for LagrangeElementTriangleDegree1 {
             }
         }
     }
+    fn entity_dofs(&self, entity_dim: usize, entity_number: usize) -> Vec<usize> {
+        if entity_dim == 0 {
+            vec![entity_number]
+        } else {
+            vec![]
+        }
+    }
 }
 
 /// Degree 0 Lagrange element on a quadrilateral
@@ -233,6 +263,13 @@ impl FiniteElement for LagrangeElementQuadrilateralDegree0 {
                     *data.get_mut(deriv, pt, 0, 0) = 0.;
                 }
             }
+        }
+    }
+    fn entity_dofs(&self, entity_dim: usize, entity_number: usize) -> Vec<usize> {
+        if entity_dim == 2 && entity_number == 0 {
+            vec![0]
+        } else {
+            vec![]
         }
     }
 }
@@ -296,12 +333,47 @@ impl FiniteElement for LagrangeElementQuadrilateralDegree1 {
             }
         }
     }
+    fn entity_dofs(&self, entity_dim: usize, entity_number: usize) -> Vec<usize> {
+        if entity_dim == 0 {
+            vec![entity_number]
+        } else {
+            vec![]
+        }
+    }
 }
 
 #[cfg(test)]
 mod test {
     use crate::element::*;
     use approx::*;
+
+    fn check_dofs(e: impl FiniteElement) {
+        let cell_dim = match e.cell_type() {
+            ReferenceCellType::Interval => Interval {}.dim(),
+            ReferenceCellType::Triangle => Triangle {}.dim(),
+            ReferenceCellType::Quadrilateral => Quadrilateral {}.dim(),
+            ReferenceCellType::Tetrahedron => Tetrahedron {}.dim(),
+            ReferenceCellType::Hexahedron => Hexahedron {}.dim(),
+            ReferenceCellType::Prism => Prism {}.dim(),
+            ReferenceCellType::Pyramid => Pyramid {}.dim(),
+        };
+        let mut ndofs = 0;
+        for dim in 0..cell_dim + 1 {
+            let entity_count = match e.cell_type() {
+                ReferenceCellType::Interval => Interval {}.entity_count(dim).unwrap(),
+                ReferenceCellType::Triangle => Triangle {}.entity_count(dim).unwrap(),
+                ReferenceCellType::Quadrilateral => Quadrilateral {}.entity_count(dim).unwrap(),
+                ReferenceCellType::Tetrahedron => Tetrahedron {}.entity_count(dim).unwrap(),
+                ReferenceCellType::Hexahedron => Hexahedron {}.entity_count(dim).unwrap(),
+                ReferenceCellType::Prism => Prism {}.entity_count(dim).unwrap(),
+                ReferenceCellType::Pyramid => Pyramid {}.entity_count(dim).unwrap(),
+            };
+            for entity in 0..entity_count {
+                ndofs += e.entity_dofs(dim, entity).len();
+            }
+        }
+        assert_eq!(ndofs, e.dim());
+    }
 
     #[test]
     fn test_lagrange_0_interval() {
@@ -314,6 +386,7 @@ mod test {
         for pt in 0..4 {
             assert_relative_eq!(*data.get(0, pt, 0, 0), 1.0);
         }
+        check_dofs(e);
     }
 
     #[test]
@@ -328,6 +401,7 @@ mod test {
             assert_relative_eq!(*data.get(0, pt, 0, 0), 1.0 - points[pt]);
             assert_relative_eq!(*data.get(0, pt, 1, 0), points[pt]);
         }
+        check_dofs(e);
     }
 
     #[test]
@@ -341,6 +415,7 @@ mod test {
         for pt in 0..6 {
             assert_relative_eq!(*data.get(0, pt, 0, 0), 1.0);
         }
+        check_dofs(e);
     }
 
     #[test]
@@ -359,6 +434,7 @@ mod test {
             assert_relative_eq!(*data.get(0, pt, 1, 0), points[2 * pt]);
             assert_relative_eq!(*data.get(0, pt, 2, 0), points[2 * pt + 1]);
         }
+        check_dofs(e);
     }
 
     #[test]
@@ -372,6 +448,7 @@ mod test {
         for pt in 0..6 {
             assert_relative_eq!(*data.get(0, pt, 0, 0), 1.0);
         }
+        check_dofs(e);
     }
 
     #[test]
@@ -397,5 +474,6 @@ mod test {
             );
             assert_relative_eq!(*data.get(0, pt, 3, 0), points[2 * pt] * points[2 * pt + 1]);
         }
+        check_dofs(e);
     }
 }
