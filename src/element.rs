@@ -36,9 +36,22 @@ pub struct TabulatedData<'a, F: FiniteElement> {
     value_size: usize,
 }
 
+fn compute_derivative_count(nderivs: usize, cell_type: ReferenceCellType) -> Result<usize, ()> {
+    match cell_type {
+        ReferenceCellType::Interval => Ok(nderivs + 1),
+        ReferenceCellType::Triangle => Ok((nderivs + 1) * (nderivs + 2) / 2),
+        ReferenceCellType::Quadrilateral => Ok((nderivs + 1) * (nderivs + 2) / 2),
+        ReferenceCellType::Tetrahedron => Ok((nderivs + 1) * (nderivs + 2) * (nderivs + 3) / 6),
+        ReferenceCellType::Hexahedron => Ok((nderivs + 1) * (nderivs + 2) * (nderivs + 3) / 6),
+        ReferenceCellType::Prism => Ok((nderivs + 1) * (nderivs + 2) * (nderivs + 3) / 6),
+        ReferenceCellType::Pyramid => Ok((nderivs + 1) * (nderivs + 2) * (nderivs + 3) / 6),
+        _ => Err(()),
+    }
+}
+
 impl<'a, F: FiniteElement> TabulatedData<'a, F> {
     pub fn new(element: &'a F, nderivs: usize, npoints: usize) -> Self {
-        let deriv_count = (nderivs + 1) * (nderivs + 2) / 2; // 2D is hardcoded here
+        let deriv_count = compute_derivative_count(nderivs, element.cell_type()).unwrap();
         let point_count = npoints;
         let basis_count = element.dim();
         let value_size = element.value_size();
@@ -60,7 +73,7 @@ impl<'a, F: FiniteElement> TabulatedData<'a, F> {
         basis: usize,
         component: usize,
     ) -> &mut f64 {
-        /// Debug here
+        // Debug here
         let index = ((deriv * self.point_count + point) * self.basis_count + basis)
             * self.value_size
             + component;
@@ -68,7 +81,7 @@ impl<'a, F: FiniteElement> TabulatedData<'a, F> {
     }
 
     pub fn get(&mut self, deriv: usize, point: usize, basis: usize, component: usize) -> &f64 {
-        /// Debug here
+        // Debug here
         let index = ((deriv * self.point_count + point) * self.basis_count + basis)
             * self.value_size
             + component;
