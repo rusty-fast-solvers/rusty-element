@@ -4,16 +4,21 @@ use crate::cell::*;
 use crate::map::*;
 pub mod lagrange;
 pub use lagrange::*;
+pub mod raviart_thomas;
+pub use raviart_thomas::*;
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy, Hash)]
 #[repr(u8)]
 pub enum ElementFamily {
     Lagrange = 0,
+    RaviartThomas = 1,
 }
 
 /// A finite element
 pub trait FiniteElement: Sized {
     const VALUE_SIZE: usize;
+    const MAP_TYPE: MapType;
+
     fn cell_type(&self) -> ReferenceCellType;
     fn degree(&self) -> usize;
     fn highest_degree(&self) -> usize;
@@ -29,7 +34,9 @@ pub trait FiniteElement: Sized {
 
     fn entity_dofs(&self, entity_dim: usize, entity_number: usize) -> Vec<usize>;
 
-    fn map_type(&self) -> MapType;
+    fn map_type(&self) -> MapType {
+        Self::MAP_TYPE
+    }
 }
 
 pub struct TabulatedData<'a, F: FiniteElement> {
