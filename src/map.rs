@@ -1,5 +1,6 @@
 //! Push forward and pull back maps
 
+use crate::cell::*;
 use crate::element::*;
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy, Hash)]
@@ -11,16 +12,81 @@ pub enum MapType {
     L2Piola = 3,
 }
 
-pub fn identity_push_forward<'a, F: FiniteElement>(data: &mut TabulatedData<'a, F>) {
+pub fn identity_push_forward<'a, 'b, F: FiniteElement, F2: FiniteElement, C: ReferenceCell>(
+    data: &mut TabulatedData<'a, F>,
+    points: &[f64],
+    geometry: &PhysicalCell<'b, F2, C>,
+) {
     assert_eq!(data.deriv_count(), 1);
 }
 
-pub fn identity_pull_back<'a, F: FiniteElement>(data: &mut TabulatedData<'a, F>) {
+pub fn identity_pull_back<'a, 'b, F: FiniteElement, F2: FiniteElement, C: ReferenceCell>(
+    data: &mut TabulatedData<'a, F>,
+    points: &[f64],
+    geometry: &PhysicalCell<'b, F2, C>,
+) {
     assert_eq!(data.deriv_count(), 1);
+}
+
+pub fn contravariant_piola_push_forward<
+    'a,
+    'b,
+    F: FiniteElement,
+    F2: FiniteElement,
+    C: ReferenceCell,
+>(
+    data: &mut TabulatedData<'a, F>,
+    points: &[f64],
+    geometry: &PhysicalCell<'b, F2, C>,
+) {
+    assert_eq!(data.deriv_count(), 1);
+
+    if geometry.tdim() == 2 && geometry.gdim() == 2 {
+        let gdim = geometry.gdim();
+        let npts = points.len() / gdim;
+        let geometry_npts = geometry.npts();
+        let nbasis = data.basis_count();
+
+        // TODO: get rid of memory assignment inside this function
+        let mut derivs = TabulatedData::new(geometry.coordinate_element(), 1, npts);
+        geometry
+            .coordinate_element()
+            .tabulate(&points, 1, &mut derivs);
+
+        let mut J = vec![0.0, 0.0, 0.0, 0.0];
+        let mut detJ = 0.0;
+
+        let mut temp_data = vec![0.0, 0.0];
+
+        for p in 0..npts {
+            J[0] = 0.0;
+            J[1] = 0.0;
+            J[2] = 0.0;
+            J[3] = 0.0;
+            for gp in 0..geometry_npts {
+                J[0] += derivs.get(1, p, gp, 0) * geometry.vertices()[gp * gdim];
+                J[1] += derivs.get(2, p, gp, 0) * geometry.vertices()[gp * gdim];
+                J[2] += derivs.get(1, p, gp, 0) * geometry.vertices()[gp * gdim + 1];
+                J[3] += derivs.get(2, p, gp, 0) * geometry.vertices()[gp * gdim + 1];
+            }
+            detJ = J[0] * J[3] - J[1] * J[2];
+
+            for i in 0..nbasis {
+                temp_data[0] = *data.get(0, p, i, 0);
+                temp_data[1] = *data.get(0, p, i, 1);
+
+                *data.get_mut(0, p, i, 0) = (J[0] * temp_data[0] + J[1] * temp_data[1]) / detJ;
+                *data.get_mut(0, p, i, 1) = (J[2] * temp_data[0] + J[3] * temp_data[1]) / detJ;
+            }
+        }
+    } else {
+        unimplemented!("push_forward not yet implemented for this element");
+    }
 }
 
 #[cfg(test)]
 mod test {
+    use crate::cell::*;
     use crate::element::*;
     use crate::map::*;
     use approx::*;
@@ -34,10 +100,46 @@ mod test {
         *data.get_mut(0, 0, 1, 0) = 0.4;
         *data.get_mut(0, 0, 2, 0) = 0.3;
 
-        identity_push_forward(&mut data);
+        let coord_e = LagrangeElementTriangleDegree1 {};
+        let ref_cell = Triangle {};
+        let vertices = vec![0.0, 1.0, 1.0, 0.0, 2.0, 1.0];
+        let geometry = PhysicalCell::new(&ref_cell, &vertices, &coord_e, 2);
+
+        let pts = vec![0.3, 0.3];
+
+        identity_push_forward(&mut data, &pts, &geometry);
 
         assert_relative_eq!(*data.get(0, 0, 0, 0), 0.5);
         assert_relative_eq!(*data.get(0, 0, 1, 0), 0.4);
         assert_relative_eq!(*data.get(0, 0, 2, 0), 0.3);
+    }
+
+    #[test]
+    fn test_contravariant_piola() {
+        let e = RaviartThomasElementTriangleDegree1 {};
+        let mut data = TabulatedData::new(&e, 0, 1);
+
+        *data.get_mut(0, 0, 0, 0) = 0.5;
+        *data.get_mut(0, 0, 0, 1) = 0.4;
+        *data.get_mut(0, 0, 1, 0) = 0.3;
+        *data.get_mut(0, 0, 1, 1) = 0.2;
+        *data.get_mut(0, 0, 2, 0) = 0.1;
+        *data.get_mut(0, 0, 2, 1) = 0.0;
+
+        let coord_e = LagrangeElementTriangleDegree1 {};
+        let ref_cell = Triangle {};
+        let vertices = vec![0.0, 1.0, 1.0, 0.0, 2.0, 1.0];
+        let geometry = PhysicalCell::new(&ref_cell, &vertices, &coord_e, 2);
+
+        let pts = vec![0.3, 0.3];
+
+        contravariant_piola_push_forward(&mut data, &pts, &geometry);
+
+        assert_relative_eq!(*data.get(0, 0, 0, 0), 0.65);
+        assert_relative_eq!(*data.get(0, 0, 0, 1), -0.25);
+        assert_relative_eq!(*data.get(0, 0, 1, 0), 0.35);
+        assert_relative_eq!(*data.get(0, 0, 1, 1), -0.15);
+        assert_relative_eq!(*data.get(0, 0, 2, 0), 0.05);
+        assert_relative_eq!(*data.get(0, 0, 2, 1), -0.05);
     }
 }

@@ -1,5 +1,6 @@
 //! Cell definitions
 
+use crate::element::*;
 pub mod cells_1d;
 pub use cells_1d::*;
 pub mod cells_2d;
@@ -81,6 +82,51 @@ pub trait ReferenceCell {
 
     /// The reference cell label
     fn label(&self) -> &'static str;
+}
+
+pub struct PhysicalCell<'a, F: FiniteElement, C: ReferenceCell> {
+    reference_cell: &'a C,
+    vertices: &'a [f64],
+    coordinate_element: &'a F,
+    gdim: usize,
+    tdim: usize,
+    npts: usize,
+}
+
+impl<'a, F: FiniteElement, C: ReferenceCell> PhysicalCell<'a, F, C> {
+    pub fn new(
+        reference_cell: &'a C,
+        vertices: &'a [f64],
+        coordinate_element: &'a F,
+        gdim: usize,
+    ) -> Self {
+        let tdim = reference_cell.dim();
+        let npts = vertices.len() / gdim;
+        Self {
+            reference_cell,
+            vertices,
+            coordinate_element,
+            gdim,
+            tdim,
+            npts,
+        }
+    }
+
+    pub fn tdim(&self) -> usize {
+        self.tdim
+    }
+    pub fn gdim(&self) -> usize {
+        self.gdim
+    }
+    pub fn coordinate_element(&self) -> &'a F {
+        self.coordinate_element
+    }
+    pub fn npts(&self) -> usize {
+        self.npts
+    }
+    pub fn vertices(&self) -> &'a [f64] {
+        self.vertices
+    }
 }
 
 #[cfg(test)]
