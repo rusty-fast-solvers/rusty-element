@@ -1,6 +1,7 @@
 //! Finite Element definitions
 
 use crate::cell::*;
+use crate::map::*;
 pub mod lagrange;
 pub use lagrange::*;
 
@@ -27,6 +28,8 @@ pub trait FiniteElement: Sized {
     fn tabulate(&self, points: &[f64], nderivs: usize, data: &mut TabulatedData<Self>);
 
     fn entity_dofs(&self, entity_dim: usize, entity_number: usize) -> Vec<usize>;
+
+    fn map_type(&self) -> MapType;
 }
 
 pub struct TabulatedData<'a, F: FiniteElement> {

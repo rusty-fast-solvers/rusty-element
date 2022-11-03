@@ -34,6 +34,10 @@ impl FiniteElement for LagrangeElement {
     fn entity_dofs(&self, entity_dim: usize, entity_number: usize) -> Vec<usize> {
         unimplemented!("entity_dofs not yet implemented for this element");
     }
+
+    fn map_type(&self) -> MapType {
+        MapType::Identity
+    }
 }
 
 /// Degree 0 Lagrange element on an interval
@@ -77,6 +81,9 @@ impl FiniteElement for LagrangeElementIntervalDegree0 {
         } else {
             vec![]
         }
+    }
+    fn map_type(&self) -> MapType {
+        MapType::Identity
     }
 }
 
@@ -128,6 +135,9 @@ impl FiniteElement for LagrangeElementIntervalDegree1 {
             vec![]
         }
     }
+    fn map_type(&self) -> MapType {
+        MapType::Identity
+    }
 }
 
 /// Degree 0 Lagrange element on a triangle
@@ -171,6 +181,9 @@ impl FiniteElement for LagrangeElementTriangleDegree0 {
         } else {
             vec![]
         }
+    }
+    fn map_type(&self) -> MapType {
+        MapType::Identity
     }
 }
 
@@ -228,6 +241,9 @@ impl FiniteElement for LagrangeElementTriangleDegree1 {
             vec![]
         }
     }
+    fn map_type(&self) -> MapType {
+        MapType::Identity
+    }
 }
 
 /// Degree 0 Lagrange element on a quadrilateral
@@ -271,6 +287,9 @@ impl FiniteElement for LagrangeElementQuadrilateralDegree0 {
         } else {
             vec![]
         }
+    }
+    fn map_type(&self) -> MapType {
+        MapType::Identity
     }
 }
 
@@ -339,6 +358,9 @@ impl FiniteElement for LagrangeElementQuadrilateralDegree1 {
         } else {
             vec![]
         }
+    }
+    fn map_type(&self) -> MapType {
+        MapType::Identity
     }
 }
 
