@@ -19,7 +19,7 @@ jobs:
         rust-version: ["stable", "beta", "nightly"]
     steps:
       - name: Set up Rust
-        uses: actions-rs/toolchain
+        uses: actions-rs/toolchain@v1
         with:
           toolchain: ${{ matrix.rust-version }}
           components: rustfmt
