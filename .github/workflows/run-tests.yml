@@ -19,13 +19,13 @@ jobs:
         rust-version: ["stable", "beta", "nightly"]
     steps:
       - name: Set up Rust
-        uses: ATiltedTree/setup-rust@v1
+        uses: actions-rs/toolchain
         with:
-          rust-version: ${{ matrix.rust-version }}
+          toolchain: ${{ matrix.rust-version }}
+          components: rustfmt
       - uses: actions/checkout@v2
       - name: Style checks
         run: |
-          rustup component add rustfmt
           cargo fmt -- --check
       - name: Build rust library
         run: |
@@ -34,26 +34,3 @@ jobs:
       - name: Run tests
         run: |
           cargo test
-#  run-tests-python:
-#    name: Run tests (Python)
-#    runs-on: ubuntu-latest
-#    strategy:
-#      matrix:
-#        python-version: ["3.7", "3.8", "3.9", "3.10"]
-#    steps:
-#      - name: Set up Python
-#        uses: actions/setup-python@v2
-#        with:
-#          python-version: ${{ matrix.python-version }}
-#      - uses: actions/checkout@v2
-#      - name: Install test requirements
-#        run: pip3 install pytest flake8
-#      - name: Style checks
-#        run: flake8 python/
-#      - name: Install Python library
-#        run: |
-#          pip3 install setuptools-rust
-#          cd python
-#          pip3 install .
-#      - name: Run tests
-#        run: python3 -m pytest python/test
